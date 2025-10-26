@@ -181,7 +181,21 @@
     <script>
        // =================================================================================
 
-    // =================================================================================
+        async function initializeAppAndAuth() {
+    // Asignamos un ID de usuario local fijo (opcional)
+    const userId = 'local-dev';
+    document.getElementById('user-info').textContent = `ID de Usuario: ${userId} (Local)`;
+
+    // Cargamos los datos directamente
+    try {
+        loadData(); // Tu función que procesa el CSV
+    } catch (error) {
+        console.error("Error al cargar los datos:", error);
+        document.getElementById('statusMessage').textContent = 'Error al cargar los datos. Ver consola.';
+        document.getElementById('statusMessage').classList.remove('hidden');
+    }
+}
+        initializeAppAndAuth();
         
         // =================================================================================
         // CONFIGURACIÓN DE DATOS Y LÓGICA DEL USUARIO
