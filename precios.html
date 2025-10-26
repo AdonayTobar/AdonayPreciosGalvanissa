@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Precios - Búsqueda Inteligente</title>
+    <title>Precios 2025</title>
     <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de PapaParse: Para leer el CSV de forma eficiente -->
@@ -180,22 +180,22 @@
     <!-- SCRIPT DE INICIALIZACIÓN Y LÓGICA DEL USUARIO -->
     <script>
        // =================================================================================
-
-        async function initializeAppAndAuth() {
-    // Asignamos un ID de usuario local fijo (opcional)
-    const userId = 'local-dev';
-    document.getElementById('user-info').textContent = `ID de Usuario: ${userId} (Local)`;
-
-    // Cargamos los datos directamente
-    try {
-        loadData(); // Tu función que procesa el CSV
-    } catch (error) {
-        console.error("Error al cargar los datos:", error);
-        document.getElementById('statusMessage').textContent = 'Error al cargar los datos. Ver consola.';
-        document.getElementById('statusMessage').classList.remove('hidden');
-    }
-}
+document.addEventListener('DOMContentLoaded', () => {
+    // =================================================================================
+    // 0. VERIFICACIÓN DE SESIÓN (SEGURIDAD)
+    // =================================================================================
+    const isLoggedIn = localStorage.getItem('loggedIn');
+    if (!isLoggedIn || isLoggedIn !== 'true') {
+        // Redirige al login si no hay sesión
+        window.location.href = "index.html"; 
+    } else {
+        // Muestra el contenido principal de la aplicación
+        document.getElementById('antialiased').classList.remove('hidden');
+        
+        // Inicializa app y carga datos
         initializeAppAndAuth();
+    }
+});
         
         // =================================================================================
         // CONFIGURACIÓN DE DATOS Y LÓGICA DEL USUARIO
@@ -203,14 +203,6 @@
         const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8XYpMQEshg2eZghit9nFFjIiRz8_G_PHnlOlYWmsX9kzrN1CH7v_FQE0ciZnU8Va4AZofLfJvm4KF/pub?gid=0&single=true&output=csv";
             // 0. VERIFICACIÓN DE SESIÓN (SEGURIDAD)
     // =================================================================================
-    const isLoggedIn = localStorage.getItem('loggedIn');
-    if (!isLoggedIn || isLoggedIn !== 'true') {
-        // Redirige al login si la bandera de sesión no existe o es incorrecta
-        window.location.href = "index.html"; 
-    } else {
-        // Muestra el contenido principal de la aplicación
-        document.getElementById('antialiased').classList.remove('hidden');
-    }
         // Variables de estado
         let allProducts = [];
         let currentSort = { column: null, direction: 'asc' };
