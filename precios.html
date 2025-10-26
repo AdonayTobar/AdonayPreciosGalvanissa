@@ -8,22 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de PapaParse: Para leer el CSV de forma eficiente -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // Exponer funciones globales (window) para que el script principal las use
-        window.initializeApp = initializeApp;
-        window.getAuth = getAuth;
-        window.signInWithCustomToken = signInWithCustomToken;
-        window.signInAnonymously = signInAnonymously;
-        window.signOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.getFirestore = getFirestore;
-        window.setLogLevel = setLogLevel;
-    </script>
 
     <!-- Configuración de la fuente Inter y CSS personalizado -->
     <style>
@@ -71,7 +55,7 @@
                     <nav id="main-nav" class="hidden md:flex space-x-6 items-center">
                         <!-- El enlace de Precios lo dejamos, aunque funcionalmente es el inicio de la sección de búsqueda -->
                         <a href="precios.html" class="text-gray-600 hover:text-indigo-600 font-medium transition duration-150 ease-in-out">Precios</a>
-                        <button id="logout-button-desktop" class="ml-4 px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-full shadow-lg transition duration-150 ease-in-out">
+                        <button id="logout-button-desktop" href="index.html" class="ml-4 px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-full shadow-lg transition duration-150 ease-in-out">
                             Cerrar Sesión
                         </button>
                     </nav>
@@ -196,7 +180,14 @@
     <!-- SCRIPT DE INICIALIZACIÓN Y LÓGICA DEL USUARIO -->
     <script>
        // =================================================================================
-    // 0. VERIFICACIÓN DE SESIÓN (SEGURIDAD)
+
+    // =================================================================================
+        
+        // =================================================================================
+        // CONFIGURACIÓN DE DATOS Y LÓGICA DEL USUARIO
+        // =================================================================================
+        const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8XYpMQEshg2eZghit9nFFjIiRz8_G_PHnlOlYWmsX9kzrN1CH7v_FQE0ciZnU8Va4AZofLfJvm4KF/pub?gid=0&single=true&output=csv";
+            // 0. VERIFICACIÓN DE SESIÓN (SEGURIDAD)
     // =================================================================================
     const isLoggedIn = localStorage.getItem('loggedIn');
     if (!isLoggedIn || isLoggedIn !== 'true') {
@@ -206,14 +197,6 @@
         // Muestra el contenido principal de la aplicación
         document.getElementById('main-content').classList.remove('hidden');
     }
-
-    // =================================================================================
-        
-        // =================================================================================
-        // CONFIGURACIÓN DE DATOS Y LÓGICA DEL USUARIO
-        // =================================================================================
-        const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8XYpMQEshg2eZghit9nFFjIiRz8_G_PHnlOlYWmsX9kzrN1CH7v_FQE0ciZnU8Va4AZofLfJvm4KF/pub?gid=0&single=true&output=csv";
-        
         // Variables de estado
         let allProducts = [];
         let currentSort = { column: null, direction: 'asc' };
