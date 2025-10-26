@@ -8,6 +8,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de PapaParse: Para leer el CSV de forma eficiente -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+        <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Exponer funciones globales (window) para que el script principal las use
+        window.initializeApp = initializeApp;
+        window.getAuth = getAuth;
+        window.signInWithCustomToken = signInWithCustomToken;
+        window.signInAnonymously = signInAnonymously;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.getFirestore = getFirestore;
+        window.setLogLevel = setLogLevel;
+    </script>
 
     <!-- Configuración de la fuente Inter y CSS personalizado -->
     <style>
@@ -182,20 +197,65 @@
        // =================================================================================
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================================
-    // 0. VERIFICACIÓN DE SESIÓN (SEGURIDAD)
-    // =================================================================================
-    const isLoggedIn = localStorage.getItem('loggedIn');
-    if (!isLoggedIn || isLoggedIn !== 'true') {
-        // Redirige al login si no hay sesión
-        window.location.href = "index.html"; 
-    } else {
-        // Muestra el contenido principal de la aplicación
-        document.getElementById('antialiased').classList.remove('hidden');
+        // CONFIGURACIÓN DE FIREBASE (MANDATORIA)
+        // =================================================================================
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        // Inicializa app y carga datos
-        initializeAppAndAuth();
-    }
-});
+        // Inicialización de Variables Globales (Firebase y Auth)
+        let db, auth, userId = 'guest';
+
+        /**
+         * Inicializa Firebase, autentica al usuario y carga el catálogo.
+         */
+        async function initializeAppAndAuth() {
+            const isLocalEnvironment = Object.keys(firebaseConfig).length === 0;
+
+            if (isLocalEnvironment) {
+                // DETECCIÓN DE ENTORNO LOCAL: Omitir la autenticación de Firebase
+                console.warn("Ejecutando en entorno local (sin config de Firebase). Omitiendo Auth y cargando datos directamente.");
+                userId = 'local-dev';
+                document.getElementById('user-info').textContent = `ID de Usuario: ${userId} (Local)`;
+                loadData();
+                return; // Salir de la función para evitar errores de Firebase
+            }
+
+            try {
+                // setLogLevel('debug'); // Descomentar para debug de Firestore
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Autenticación usando el token o anónimamente
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Esperar a que el estado de autenticación se resuelva
+                onAuthStateChanged(auth, (user) => {
+                    // El contenido principal ya está visible, solo actualizamos la información y cargamos datos
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('user-info').textContent = `ID de Usuario: ${userId}`;
+                        // Una vez autenticado, cargamos los datos del catálogo
+                        loadData(); 
+                    } else {
+                        userId = 'anonymous';
+                        document.getElementById('user-info').textContent = `ID de Usuario: ${userId} (Anónimo)`;
+                        loadData(); // Carga de igual forma si no se requiere autenticación estricta en los datos
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error al inicializar Firebase o autenticar:", error);
+                // Como la pantalla de carga se quitó, mostramos el error en la barra de estado
+                document.getElementById('statusMessage').textContent = 'Error crítico de autenticación. Ver consola.';
+                document.getElementById('statusMessage').classList.remove('hidden');
+            }
+        }
         
         // =================================================================================
         // CONFIGURACIÓN DE DATOS Y LÓGICA DEL USUARIO
