@@ -194,9 +194,6 @@
 
     <!-- SCRIPT DE INICIALIZACIÓN Y LÓGICA DEL USUARIO -->
     <script>
-       // =================================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    // =================================================================================
         // CONFIGURACIÓN DE FIREBASE (MANDATORIA)
         // =================================================================================
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
@@ -210,18 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
          * Inicializa Firebase, autentica al usuario y carga el catálogo.
          */
         async function initializeAppAndAuth() {
-            const isLocalEnvironment = Object.keys(firebaseConfig).length === 0;
-
-            if (isLocalEnvironment) {
-                // DETECCIÓN DE ENTORNO LOCAL: Omitir la autenticación de Firebase
-                console.warn("Ejecutando en entorno local (sin config de Firebase). Omitiendo Auth y cargando datos directamente.");
-                userId = 'local-dev';
-                document.getElementById('user-info').textContent = `ID de Usuario: ${userId} (Local)`;
-                loadData();
-                return; // Salir de la función para evitar errores de Firebase
-            }
-
             try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    console.error("Firebase config no está disponible.");
+                    return;
+                }
+                
                 // setLogLevel('debug'); // Descomentar para debug de Firestore
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
